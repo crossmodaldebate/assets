@@ -8,10 +8,13 @@ from main import (
     plot_sunburst_chart,
     plot_boxplot,
     plot_correlation_matrix,
+    plot_pca,
 )
 
-# Dados Sintéticos Realistas (Binance) - Adaptado para leitura de CSV
-binance_csv = """Altcoin,Preço (USD),Volume (24h),Market Cap (USD),Variação (24h)
+# Fixtures para os DataFrames
+@pytest.fixture
+def df_binance():
+    binance_csv = """Altcoin,Preço (USD),Volume (24h),Market Cap (USD),Variação (24h)
 Aergo (AERGO),0.12,5000000,60000000,2.5
 Aion (AION),0.08,3000000,40000000,-1.2
 Bluzelle (BLZ),0.05,2000000,25000000,0.8
@@ -32,11 +35,11 @@ Ontology (ONT),0.50,2000000,250000000,1.2
 Quant (QNT),100,4000000,5000000000,-1.5
 Ravencoin (RVN),0.035,3000000,175000000,2.1
 Reserve (RSV),0.02,1500000,10000000,0.5"""
+    return pd.read_csv(io.StringIO(binance_csv))
 
-df_altcoins_binance = pd.read_csv(io.StringIO(binance_csv))
-
-# Dados (GitHub)
-github_csv = """Altcoin,Número de Commits (último mês),Número de Issues Abertas,Número de Pull Requests (último mês),Atividade da Comunidade (escala 1-10)
+@pytest.fixture
+def df_github():
+    github_csv = """Altcoin,Número de Commits (último mês),Número de Issues Abertas,Número de Pull Requests (último mês),Atividade da Comunidade (escala 1-10)
 Aergo (AERGO),180,30,60,7.5
 Aion (AION),150,25,50,6.8
 Bluzelle (BLZ),120,20,40,6.2
@@ -57,46 +60,20 @@ Ontology (ONT),195,33,68,7.9
 Quant (QNT),260,45,90,9.0
 Ravencoin (RVN),175,30,60,7.6
 Reserve (RSV),155,25,50,7.0"""
+    return pd.read_csv(io.StringIO(github_csv))
 
-df_altcoins_github = pd.read_csv(io.StringIO(github_csv))
+# Testes para as funções de plotagem
+def test_plot_box_violin(df_binance):
+    plot_box_violin(df_binance, "Altcoin", "Preço (USD)", "Teste Box Violin")
 
+def test_plot_sunburst_chart(df_binance):
+    plot_sunburst_chart(df_binance, "Market Cap (USD)", "Altcoin", "Teste Sunburst Chart")
 
-def test_plot_box_violin():
-    # Testa se a função plot_box_violin gera um gráfico sem erros
-    try:
-        plot_box_violin(
-            df_altcoins_binance, "Altcoin", "Preço (USD)", "Teste Box Violin"
-        )
-    except Exception as e:
-        pytest.fail(f"Erro ao gerar o gráfico Box Violin: {e}")
+def test_plot_boxplot(df_binance):
+    plot_boxplot(df_binance, "Altcoin", "Volume (24h)", "Teste Boxplot")
 
+def test_plot_correlation_matrix(df_github):
+    plot_correlation_matrix(df_github, "Teste Correlation Matrix")
 
-def test_plot_sunburst_chart():
-    # Testa se a função plot_sunburst_chart gera um gráfico sem erros
-    try:
-        plot_sunburst_chart(
-            df_altcoins_binance,
-            "Market Cap (USD)",
-            "Altcoin",
-            "Teste Sunburst Chart",
-        )
-    except Exception as e:
-        pytest.fail(f"Erro ao gerar o gráfico Sunburst Chart: {e}")
-
-
-def test_plot_boxplot():
-    # Testa se a função plot_boxplot gera um gráfico sem erros
-    try:
-        plot_boxplot(
-            df_altcoins_binance, "Altcoin", "Volume (24h)", "Teste Boxplot"
-        )
-    except Exception as e:
-        pytest.fail(f"Erro ao gerar o gráfico Boxplot: {e}")
-
-
-def test_plot_correlation_matrix():
-    # Testa se a função plot_correlation_matrix gera um gráfico sem erros
-    try:
-        plot_correlation_matrix(df_altcoins_github, "Teste Correlation Matrix")
-    except Exception as e:
-        pytest.fail(f"Erro ao gerar o gráfico Correlation Matrix: {e}")
+def test_plot_pca(df_binance):
+    plot_pca(df_binance, "Teste PCA")
